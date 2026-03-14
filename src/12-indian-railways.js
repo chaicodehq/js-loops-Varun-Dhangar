@@ -46,4 +46,65 @@
  */
 export function railwayReservation(passengers, trains) {
   // Your code here
+  if (
+    !Array.isArray(passengers) ||
+    passengers.length === 0 ||
+    !Array.isArray(trains) ||
+    trains.length === 0
+  )
+    return [];
+
+  const results = [];
+
+  for (const passenger of passengers) {
+    let allocated = false;
+    let train = null;
+    for (const t of trains) {
+      if (t.trainNumber === passenger.trainNumber) {
+        train = t;
+        break;
+      }
+    }
+
+    if (!train) {
+      results.push({
+        name: passenger.name,
+        trainNumber: passenger.trainNumber,
+        class: null,
+        status: "train_not_found",
+      });
+      continue;
+    }
+
+    if (train.seats?.[passenger.preferred] > 0) {
+      train.seats[passenger.preferred]--;
+      results.push({
+        name: passenger.name,
+        trainNumber: passenger.trainNumber,
+        class: passenger.preferred,
+        status: "confirmed",
+      });
+      allocated = true;
+    } else if (train.seats?.[passenger.fallback] > 0) {
+      train.seats[passenger.fallback]--;
+      results.push({
+        name: passenger.name,
+        trainNumber: passenger.trainNumber,
+        class: passenger.fallback,
+        status: "confirmed",
+      });
+      allocated = true;
+    }
+
+    if (!allocated) {
+      results.push({
+        name: passenger.name,
+        trainNumber: passenger.trainNumber,
+        class: passenger.preferred,
+        status: "waitlisted",
+      });
+    }
+  }
+
+  return results;
 }
